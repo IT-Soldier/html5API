@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="js/jquery.js"></script>
+</head>
+<body>
+    <!-- 实现效果:1.点击链接,利用ajax技术向服务端请求数据,填充页面内容.用单页面模拟多页面的效果 -->
+            <!-- 2.ajax技术,有一个缺点,浏览器只有在页面真正跳转时才会自动存储历史记录,本次需要手动存储 -->
+    <a class="btn" data-url="first" href="javascript:;">首页</a>
+    <a class="btn" data-url="list" href="javascript:;">列表页</a>
+    <div id="container"></div>
+    <script>
+        
+        var btn = $(".btn");
+        var container = $("#container");
+
+        btn.on("click", function () {
+            // 需要设置自定义属性,去区别两个a标签,从而确定要获取的页面
+            // 且需要存到历史记录中,history.pushState(data,title),第一个参数使用
+            var url = $(this).attr("data-url");
+            
+            // 为了防止重复点击一个按钮而导致历史连续记录一个值,onpopstate事件触发,跳转不到其他页面
+            // 用户体验很差
+            if(url == history.state) {
+                return;
+            }
+            history.pushState(url,"");
+            console.log(history.state);
+            
+            jump(url);
+        });
+        
+        window.onpopstate = function (e) {
+            // history.state   取出的就是传入到pushState函数的第一个参数
+            //history.state等价于e.state
+            // 因为当点击浏览器的前进或后退按钮时，popstate事件被触发，
+            // 浏览器会到history序列中去找到上一个或下一个state，并且将这个state放到event.state中。
+            // 这个时候，e.state就是最新的state状态,所以使用history.state可以读取到同样的内容。
+            
+            var url = history.state;
+            // history.state有为null的时候,跳转到home页
+            if(url == null) {
+                url = "first";
+            }
+            // console.log(url);
+            jump(url);
+        }
+
+        function jump(url) {
+            if(url == "first") {
+                $.ajax({
+                    url:"./tpl/home.html",
+                    success : function (data) {
+                        container.html(data);
+                    }
+                });
+            } else if(url == "list") {
+                $.ajax({
+                    url:"./tpl/list.html",
+                    success : function (data) {
+                        container.html(data);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
